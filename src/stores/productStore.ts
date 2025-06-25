@@ -55,7 +55,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       
       if (response.success && response.data) {
         set({
-          products: response.data.items,
+          products: response.data.data,
           pagination: response.data.pagination,
           isLoading: false,
         });
@@ -158,7 +158,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       const response = await apiService.searchProducts(query);
       if (response.success && response.data) {
         set({
-          products: response.data.items,
+          products: response.data.data,
           pagination: response.data.pagination,
           isLoading: false,
         });

@@ -62,7 +62,7 @@ class ApiService {
   }
 
   async getProfile(): Promise<ApiResponse<User>> {
-    const response: AxiosResponse<ApiResponse<User>> = await this.api.get('/auth/profile');
+    const response: AxiosResponse<ApiResponse<User>> = await this.api.get('/auth/me');
     return response.data;
   }
 

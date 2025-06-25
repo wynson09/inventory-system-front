@@ -69,7 +69,7 @@ export interface PaginatedResponse<T> {
   success: boolean;
   message: string;
   data: {
-    items: T[];
+    data: T[];
     pagination: {
       page: number;
       limit: number;

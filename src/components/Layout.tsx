@@ -1,7 +1,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Button } from './ui/button';
-import { Package, Home, Plus, LogOut } from 'lucide-react';
+import { Package, Home, LogOut } from 'lucide-react';
 
 const Layout = () => {
   const { user, logout } = useAuthStore();
@@ -61,14 +61,6 @@ const Layout = () => {
             >
               <Package className="h-4 w-4" />
               <span>Products</span>
-            </Link>
-            
-            <Link
-              to="/products/create"
-              className="flex items-center space-x-2 px-3 py-4 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Product</span>
             </Link>
           </div>
         </div>
