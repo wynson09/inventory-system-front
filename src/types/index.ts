@@ -26,26 +26,31 @@ export interface RegisterData {
 export interface Product {
   _id: string;
   name: string;
-  description: string;
+  description?: string;
+  sku: string;
+  category: string;
   price: number;
   quantity: number;
-  category: string;
-  sku: string;
-  imageUrl?: string;
+  minStockLevel: number;
+  images: string[];
   isActive: boolean;
-  createdBy: string;
+  userId: string;
   createdAt: string;
   updatedAt: string;
+  // Virtual fields
+  isLowStock?: boolean;
+  stockStatus?: 'OUT_OF_STOCK' | 'LOW_STOCK' | 'IN_STOCK';
 }
 
 export interface CreateProductData {
   name: string;
-  description: string;
+  description?: string;
+  sku: string;
+  category: string;
   price: number;
   quantity: number;
-  category: string;
-  sku: string;
-  imageUrl?: string;
+  minStockLevel: number;
+  images?: string[];
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {
