@@ -6,11 +6,10 @@ import { Input } from '../components/ui/input'
 import CreateProductModal from '../components/CreateProductModal'
 import EditProductModal from '../components/EditProductModal'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import FilterDropdown from '../components/FilterDropdown'
 import {
   Search,
   Plus,
-  Filter,
-  ChevronDown,
   Edit,
   Eye,
   Trash2,
@@ -157,31 +156,31 @@ const ProductsTable = memo(
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-600 border-b border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
-                    className="rounded border-gray-300"
+                    className="rounded border-gray-400 bg-gray-700"
                     disabled={isLoading}
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Last Update
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -350,13 +349,23 @@ const Products = () => {
 
   const itemsPerPage = 10
 
-  // Initialize search from URL params on component mount
+    // Initialize filters from URL params on component mount
   useEffect(() => {
     const searchFromUrl = searchParams.get('search') || ''
+    const categoryFromUrl = searchParams.get('category') || ''
+    const minPriceFromUrl = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined
+    const maxPriceFromUrl = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined
+    const inStockFromUrl = searchParams.get('inStock') === 'true' ? true : undefined
     const pageFromUrl = parseInt(searchParams.get('page') || '1', 10)
-
+    
     setLocalSearchValue(searchFromUrl)
-    setFilters({ search: searchFromUrl })
+    setFilters({
+      search: searchFromUrl || undefined,
+      category: categoryFromUrl || undefined,
+      minPrice: minPriceFromUrl,
+      maxPrice: maxPriceFromUrl,
+      inStock: inStockFromUrl,
+    })
     setCurrentPage(pageFromUrl)
   }, []) // Only run on mount
 
@@ -381,15 +390,26 @@ const Products = () => {
 
   const navigate = useNavigate()
 
-  // Update URL when search or page changes
+  // Update URL when filters or page changes
   const updateUrlParams = useCallback(
-    (searchQuery: string, page: number) => {
+    (filters: ProductFilters, page: number) => {
       const newParams = new URLSearchParams()
 
-      if (searchQuery) {
-        newParams.set('search', searchQuery)
+      if (filters.search) {
+        newParams.set('search', filters.search)
       }
-
+      if (filters.category) {
+        newParams.set('category', filters.category)
+      }
+      if (filters.minPrice !== undefined) {
+        newParams.set('minPrice', filters.minPrice.toString())
+      }
+      if (filters.maxPrice !== undefined) {
+        newParams.set('maxPrice', filters.maxPrice.toString())
+      }
+      if (filters.inStock) {
+        newParams.set('inStock', 'true')
+      }
       if (page > 1) {
         newParams.set('page', page.toString())
       }
@@ -411,9 +431,10 @@ const Products = () => {
 
       // Set new timeout
       debounceTimeoutRef.current = setTimeout(() => {
-        setFilters(prev => ({ ...prev, search: value }))
+        const newFilters = { ...filters, search: value }
+        setFilters(newFilters)
         setCurrentPage(1) // Reset to first page when searching
-        updateUrlParams(value, 1) // Update URL
+        updateUrlParams(newFilters, 1) // Update URL
       }, 300)
     },
     [updateUrlParams]
@@ -421,22 +442,30 @@ const Products = () => {
 
   const clearSearch = useCallback(() => {
     setLocalSearchValue('')
-    setFilters(prev => ({ ...prev, search: '' }))
+    const newFilters = { ...filters, search: undefined }
+    setFilters(newFilters)
     setCurrentPage(1)
-    updateUrlParams('', 1) // Clear URL params
+    updateUrlParams(newFilters, 1) // Clear URL params
     // Maintain focus after clearing
     setTimeout(() => {
       searchInputRef.current?.focus()
     }, 0)
+  }, [updateUrlParams, filters])
+
+  // Handle filter changes
+  const handleFiltersChange = useCallback((newFilters: ProductFilters) => {
+    setFilters(newFilters)
+    setCurrentPage(1) // Reset to first page when filtering
+    updateUrlParams(newFilters, 1)
   }, [updateUrlParams])
 
   // Update URL when page changes
   const handlePageChange = useCallback(
     (page: number) => {
       setCurrentPage(page)
-      updateUrlParams(filters.search || '', page)
+      updateUrlParams(filters, page)
     },
-    [filters.search, updateUrlParams]
+    [filters, updateUrlParams]
   )
 
   // Cleanup timeout on unmount
@@ -477,7 +506,7 @@ const Products = () => {
       if (products.length === 1 && currentPage > 1) {
         const newPage = currentPage - 1
         setCurrentPage(newPage)
-        updateUrlParams(filters.search || '', newPage)
+        updateUrlParams(filters, newPage)
       }
     } catch (error) {
       console.error('Delete failed:', error)
@@ -615,11 +644,11 @@ const Products = () => {
             Add product
           </Button>
 
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter options
-            <ChevronDown className="h-4 w-4 ml-1" />
-          </Button>
+          <FilterDropdown
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            isLoading={isLoading}
+          />
         </div>
       </div>
 

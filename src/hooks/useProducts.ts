@@ -43,6 +43,9 @@ export const useProducts = (
         limit,
         search: filters.search,
         category: filters.category,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        inStock: filters.inStock,
       })
 
       if (!response.success || !response.data) {
@@ -71,6 +74,24 @@ export const useProduct = (id: string) => {
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+// Fetch Categories Hook
+export const useCategories = () => {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await apiService.getCategories()
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to fetch categories')
+      }
+      
+      return response.data
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
+    gcTime: 30 * 60 * 1000, // 30 minutes
   })
 }
 

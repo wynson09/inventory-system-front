@@ -85,9 +85,17 @@ class ApiService {
     limit?: number
     search?: string
     category?: string
+    minPrice?: number
+    maxPrice?: number
+    inStock?: boolean
   }): Promise<PaginatedResponse<Product>> {
     const response: AxiosResponse<PaginatedResponse<Product>> =
       await this.api.get('/products', { params })
+    return response.data
+  }
+
+  async getCategories(): Promise<ApiResponse<string[]>> {
+    const response: AxiosResponse<ApiResponse<string[]>> = await this.api.get('/products/categories')
     return response.data
   }
 
