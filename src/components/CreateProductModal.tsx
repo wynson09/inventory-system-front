@@ -40,13 +40,14 @@ const CreateProductModal = ({
     setValue,
     reset,
   } = useForm<CreateProductData>({
+    mode: 'onChange',
     defaultValues: {
       name: '',
       description: '',
       sku: '',
       category: '',
-      price: 0,
-      quantity: 0,
+      price: undefined,
+      quantity: undefined,
       minStockLevel: 5,
       images: [],
     },
@@ -128,7 +129,7 @@ const CreateProductModal = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-900">
-            Create Product
+            Create New Product
           </h2>
           <button
             onClick={handleClose}
@@ -196,6 +197,10 @@ const CreateProductModal = ({
                     placeholder="Enter SKU (will be uppercase)"
                     {...register('sku', {
                       required: 'SKU is required',
+                      minLength: {
+                        value: 3,
+                        message: 'SKU must be at least 3 characters',
+                      },
                       maxLength: {
                         value: 50,
                         message: 'SKU cannot exceed 50 characters',
@@ -294,17 +299,14 @@ const CreateProductModal = ({
                     id="price"
                     type="number"
                     step="0.01"
-                    min="0"
                     className="pl-10"
                     placeholder="0.00"
                     {...register('price', {
                       required: 'Price is required',
                       min: {
-                        value: 0,
-                        message: 'Price cannot be negative',
-                      },
-                      validate: value =>
-                        value > 0 || 'Price must be greater than 0',
+                        value: 0.01,
+                        message: 'Price must be greater than 0'
+                      }
                     })}
                   />
                 </div>
@@ -332,15 +334,14 @@ const CreateProductModal = ({
                   <Input
                     id="quantity"
                     type="number"
-                    min="0"
                     className="pl-10"
                     placeholder="0"
                     {...register('quantity', {
                       required: 'Quantity is required',
                       min: {
                         value: 0,
-                        message: 'Quantity cannot be negative',
-                      },
+                        message: 'Quantity must be 0 or greater'
+                      }
                     })}
                   />
                 </div>
@@ -365,15 +366,15 @@ const CreateProductModal = ({
                   <Input
                     id="minStockLevel"
                     type="number"
-                    min="0"
                     className="pl-10"
                     placeholder="5"
                     {...register('minStockLevel', {
                       required: 'Minimum stock level is required',
                       min: {
                         value: 0,
-                        message: 'Minimum stock level cannot be negative',
+                        message: 'Minimum stock level must be 0 or greater',
                       },
+                      valueAsNumber: true,
                     })}
                   />
                 </div>

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useProducts, useDeleteProduct } from '../hooks/useProducts'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import CreateProductModal from '../components/CreateProductModal'
 import EditProductModal from '../components/EditProductModal'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import ProductPreviewModal from '../components/ProductPreviewModal'
 import FilterDropdown from '../components/FilterDropdown'
 import {
   Search,
@@ -135,7 +136,7 @@ const ProductsTable = memo(
     searchQuery: string
     onEdit: (product: Product) => void
     onDelete: (product: Product) => void
-    onPreview: (productId: string) => void
+    onPreview: (product: Product) => void
     onCreateNew: () => void
     onClearSearch: () => void
     getStockStatus: (
@@ -158,13 +159,6 @@ const ProductsTable = memo(
           <table className="w-full">
             <thead className="bg-gray-600 border-b border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-400 bg-gray-700"
-                    disabled={isLoading}
-                  />
-                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Product
                 </th>
@@ -190,7 +184,7 @@ const ProductsTable = memo(
             >
               {!products || products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     {searchQuery ? (
                       <>
                         <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -236,12 +230,6 @@ const ProductsTable = memo(
                   )
                   return (
                     <tr key={product._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <input
-                          type="checkbox"
-                          className="rounded border-gray-300"
-                        />
-                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
@@ -303,7 +291,7 @@ const ProductsTable = memo(
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onPreview(product._id)}
+                            onClick={() => onPreview(product)}
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             Preview
@@ -339,8 +327,10 @@ const Products = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [productToPreview, setProductToPreview] = useState<Product | null>(null)
 
   // Search state management with refs to prevent focus loss
   const [localSearchValue, setLocalSearchValue] = useState('')
@@ -388,7 +378,7 @@ const Products = () => {
     pages: 0,
   }
 
-  const navigate = useNavigate()
+
 
   // Update URL when filters or page changes
   const updateUrlParams = useCallback(
@@ -483,12 +473,10 @@ const Products = () => {
     setIsEditModalOpen(true)
   }, [])
 
-  const handlePreview = useCallback(
-    (productId: string) => {
-      navigate(`/products/${productId}`)
-    },
-    [navigate]
-  )
+  const handlePreview = useCallback((product: Product) => {
+    setProductToPreview(product)
+    setIsPreviewModalOpen(true)
+  }, [])
 
   const handleDeleteClick = useCallback((product: Product) => {
     setProductToDelete(product)
@@ -694,6 +682,7 @@ const Products = () => {
                   size="sm"
                   onClick={() => handleGoToPage(page)}
                   disabled={isLoading}
+                  className={currentPage === page ? 'bg-gray-600 hover:bg-gray-700 text-white' : ''}
                 >
                   {page}
                 </Button>
@@ -758,6 +747,16 @@ const Products = () => {
         onConfirm={handleDeleteConfirm}
         product={productToDelete}
         isDeleting={deleteProductMutation.isPending}
+      />
+
+      {/* Product Preview Modal */}
+      <ProductPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => {
+          setIsPreviewModalOpen(false)
+          setProductToPreview(null)
+        }}
+        product={productToPreview}
       />
     </div>
   )
