@@ -5,6 +5,7 @@ import { useProductStore } from '../stores/productStore';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import CreateProductModal from '../components/CreateProductModal';
+import EditProductModal from '../components/EditProductModal';
 import { 
   Search, 
   Plus, 
@@ -23,6 +24,8 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const itemsPerPage = 10;
 
   const { 
@@ -53,8 +56,9 @@ const Products = () => {
     console.log('Searching for:', searchQuery);
   };
 
-  const handleEdit = (productId: string) => {
-    navigate(`/products/${productId}/edit`);
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
   };
 
   const handlePreview = (productId: string) => {
@@ -267,7 +271,7 @@ const Products = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEdit(product._id)}
+                            onClick={() => handleEdit(product)}
                           >
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
@@ -362,6 +366,20 @@ const Products = () => {
           // Refresh the products list after successful creation
           fetchProducts({ page: currentPage, limit: itemsPerPage });
         }}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSuccess={() => {
+          // Refresh the products list after successful update
+          fetchProducts({ page: currentPage, limit: itemsPerPage });
+        }}
+        product={selectedProduct}
       />
     </div>
   );
