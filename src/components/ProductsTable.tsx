@@ -71,7 +71,7 @@ const ProductsTable = ({
 
   // Use refs to prevent focus loss and manage debouncing
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [localSearchValue, setLocalSearchValue] = useState(searchQuery)
 
   const navigate = useNavigate()
@@ -163,7 +163,7 @@ const ProductsTable = ({
   }, [])
 
   // Define columns - memoized to prevent unnecessary re-renders
-  const columns = useMemo<ColumnDef<Product>[]>(
+  const columns = useMemo(
     () => [
       // Selection column
       columnHelper.display({
@@ -323,7 +323,7 @@ const ProductsTable = ({
         enableSorting: false,
         enableHiding: false,
       }),
-    ],
+    ] as ColumnDef<Product>[],
     [
       isLoading,
       getCategoryColor,
