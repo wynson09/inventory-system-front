@@ -6,7 +6,7 @@ const Dashboard = () => {
         <p className="text-gray-600">Welcome to your inventory dashboard!</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard; 
+export default Dashboard

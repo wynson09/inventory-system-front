@@ -1,50 +1,52 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Package, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../stores/authStore'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Package, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
-  const { login, isLoading, error } = useAuthStore();
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  )
+
+  const { login, isLoading, error } = useAuthStore()
+  const navigate = useNavigate()
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
-    
+    const newErrors: { email?: string; password?: string } = {}
+
     if (!email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email is required'
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Email is invalid'
     }
-    
+
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Password is required'
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Password must be at least 6 characters'
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-    
+    e.preventDefault()
+
+    if (!validateForm()) return
+
     try {
-      await login({ email, password });
-      navigate('/dashboard');
+      await login({ email, password })
+      navigate('/dashboard')
     } catch {
       // Error is handled by the store
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -66,17 +68,20 @@ const Login = () => {
             </Link>
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1 relative">
@@ -92,7 +97,7 @@ const Login = () => {
                   className="pl-10"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                 />
               </div>
               {errors.email && (
@@ -101,7 +106,10 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1 relative">
@@ -117,7 +125,7 @@ const Login = () => {
                   className="pl-10 pr-10"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -138,18 +146,14 @@ const Login = () => {
           </div>
 
           <div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login; 
+export default Login

@@ -1,24 +1,39 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import { useProductStore } from '../stores/productStore';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Save, Package, DollarSign, Hash, Tag, Warehouse, AlertCircle, Image, X, Plus } from 'lucide-react';
-import type { Product, UpdateProductData } from '../types';
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { useUpdateProduct } from '../hooks/useProducts'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import {
+  Save,
+  Package,
+  DollarSign,
+  Hash,
+  Tag,
+  Warehouse,
+  AlertCircle,
+  Image,
+  X,
+  Plus,
+} from 'lucide-react'
+import type { Product, UpdateProductData } from '../types'
 
 interface EditProductModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-  product: Product | null;
+  isOpen: boolean
+  onClose: () => void
+  onSuccess?: () => void
+  product: Product | null
 }
 
-const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductModalProps) => {
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageError, setImageError] = useState('');
-  
-  const { updateProduct, isLoading } = useProductStore();
+const EditProductModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  product,
+}: EditProductModalProps) => {
+  const [imageUrl, setImageUrl] = useState('')
+  const [imageError, setImageError] = useState('')
+
+  const updateProductMutation = useUpdateProduct()
 
   const {
     register,
@@ -26,7 +41,7 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
     formState: { errors, isSubmitting },
     watch,
     setValue,
-    reset
+    reset,
   } = useForm<UpdateProductData>({
     defaultValues: {
       name: '',
@@ -36,12 +51,12 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
       price: 0,
       quantity: 0,
       minStockLevel: 5,
-      images: []
-    }
-  });
+      images: [],
+    },
+  })
 
   // Watch images array for real-time updates
-  const images = watch('images') || [];
+  const images = watch('images') || []
 
   // Common categories for dropdown
   const categories = [
@@ -55,8 +70,8 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
     'Health & Beauty',
     'Automotive',
     'Office Supplies',
-    'Other'
-  ];
+    'Other',
+  ]
 
   // Reset form with product data when modal opens or product changes
   useEffect(() => {
@@ -69,67 +84,64 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
         price: product.price,
         quantity: product.quantity,
         minStockLevel: product.minStockLevel,
-        images: product.images || []
-      });
+        images: product.images || [],
+      })
     }
-  }, [product, isOpen, reset]);
+  }, [product, isOpen, reset])
 
   const addImage = () => {
     if (imageUrl.trim() && !images.includes(imageUrl.trim())) {
       // Basic URL validation
-      const urlPattern = /^https?:\/\/.+/;
+      const urlPattern = /^https?:\/\/.+/
       if (urlPattern.test(imageUrl.trim())) {
-        setValue('images', [...images, imageUrl.trim()]);
-        setImageUrl('');
-        setImageError('');
+        setValue('images', [...images, imageUrl.trim()])
+        setImageUrl('')
+        setImageError('')
       } else {
-        setImageError('Please enter a valid URL (starting with http:// or https://)');
+        setImageError(
+          'Please enter a valid URL (starting with http:// or https://)'
+        )
       }
     }
-  };
+  }
 
   const removeImage = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    setValue('images', updatedImages);
-  };
+    const updatedImages = images.filter((_, i) => i !== index)
+    setValue('images', updatedImages)
+  }
 
   const handleClose = () => {
-    reset();
-    setImageUrl('');
-    setImageError('');
-    onClose();
-  };
+    reset()
+    setImageUrl('')
+    setImageError('')
+    onClose()
+  }
 
   const onSubmit = async (data: UpdateProductData) => {
-    if (!product) return;
+    if (!product) return
+
+    // Convert SKU to uppercase before submission
+    const formData = {
+      ...data,
+      sku: data.sku?.toUpperCase(),
+      images: data.images || [],
+    }
 
     try {
-      // Convert SKU to uppercase before submission
-      const formData = {
-        ...data,
-        sku: data.sku?.toUpperCase(),
-        images: data.images || []
-      };
-      
-      await updateProduct(product._id, formData);
-      
-      // Success toast
-      toast.success('Product updated successfully! ✅', {
-        duration: 3000,
-      });
-      
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      // Error toast
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update product';
-      toast.error(errorMessage, {
-        duration: 5000,
-      });
-    }
-  };
+      await updateProductMutation.mutateAsync({
+        id: product._id,
+        data: formData,
+      })
 
-  if (!isOpen || !product) return null;
+      onSuccess?.()
+      onClose()
+    } catch (error) {
+      // Error is handled by the mutation's onError callback
+      console.error('Update product failed:', error)
+    }
+  }
+
+  if (!isOpen || !product) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -151,7 +163,10 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Product Name *
                 </label>
                 <div className="relative">
@@ -167,19 +182,26 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                       required: 'Product name is required',
                       maxLength: {
                         value: 100,
-                        message: 'Product name cannot exceed 100 characters'
+                        message: 'Product name cannot exceed 100 characters',
                       },
-                      validate: value => (value && value.trim().length > 0) || 'Product name cannot be empty'
+                      validate: value =>
+                        (value && value.trim().length > 0) ||
+                        'Product name cannot be empty',
                     })}
                   />
                 </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="sku"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   SKU *
                 </label>
                 <div className="relative">
@@ -195,25 +217,32 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                       required: 'SKU is required',
                       maxLength: {
                         value: 50,
-                        message: 'SKU cannot exceed 50 characters'
+                        message: 'SKU cannot exceed 50 characters',
                       },
-                      validate: value => (value && value.trim().length > 0) || 'SKU cannot be empty'
+                      validate: value =>
+                        (value && value.trim().length > 0) ||
+                        'SKU cannot be empty',
                     })}
-                    onChange={(e) => {
-                      const value = e.target.value.toUpperCase();
-                      setValue('sku', value);
+                    onChange={e => {
+                      const value = e.target.value.toUpperCase()
+                      setValue('sku', value)
                     }}
                   />
                 </div>
                 {errors.sku && (
-                  <p className="mt-1 text-sm text-red-600">{errors.sku.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.sku.message}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Description
               </label>
               <textarea
@@ -224,19 +253,24 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                 {...register('description', {
                   maxLength: {
                     value: 500,
-                    message: 'Description cannot exceed 500 characters'
-                  }
+                    message: 'Description cannot exceed 500 characters',
+                  },
                 })}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.description.message}
+                </p>
               )}
             </div>
 
             {/* Category and Price */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Category *
                 </label>
                 <div className="relative">
@@ -247,11 +281,11 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                     id="category"
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     {...register('category', {
-                      required: 'Category is required'
+                      required: 'Category is required',
                     })}
                   >
                     <option value="">Select a category</option>
-                    {categories.map((category) => (
+                    {categories.map(category => (
                       <option key={category} value={category}>
                         {category}
                       </option>
@@ -259,12 +293,17 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                   </select>
                 </div>
                 {errors.category && (
-                  <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.category.message}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="price"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Price *
                 </label>
                 <div className="relative">
@@ -282,14 +321,17 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                       required: 'Price is required',
                       min: {
                         value: 0,
-                        message: 'Price cannot be negative'
+                        message: 'Price cannot be negative',
                       },
-                      validate: value => (value && value > 0) || 'Price must be greater than 0'
+                      validate: value =>
+                        (value && value > 0) || 'Price must be greater than 0',
                     })}
                   />
                 </div>
                 {errors.price && (
-                  <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.price.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -297,7 +339,10 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
             {/* Inventory Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="quantity"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Current Quantity *
                 </label>
                 <div className="relative">
@@ -314,18 +359,23 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                       required: 'Quantity is required',
                       min: {
                         value: 0,
-                        message: 'Quantity cannot be negative'
-                      }
+                        message: 'Quantity cannot be negative',
+                      },
                     })}
                   />
                 </div>
                 {errors.quantity && (
-                  <p className="mt-1 text-sm text-red-600">{errors.quantity.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.quantity.message}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="minStockLevel" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="minStockLevel"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Minimum Stock Level *
                 </label>
                 <div className="relative">
@@ -342,13 +392,15 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                       required: 'Minimum stock level is required',
                       min: {
                         value: 0,
-                        message: 'Minimum stock level cannot be negative'
-                      }
+                        message: 'Minimum stock level cannot be negative',
+                      },
                     })}
                   />
                 </div>
                 {errors.minStockLevel && (
-                  <p className="mt-1 text-sm text-red-600">{errors.minStockLevel.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.minStockLevel.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -358,7 +410,7 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Product Images (Optional)
               </label>
-              
+
               {/* Add Image Input */}
               <div className="flex gap-2 mb-4">
                 <div className="flex-1">
@@ -366,7 +418,7 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                     type="url"
                     placeholder="Enter image URL"
                     value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
+                    onChange={e => setImageUrl(e.target.value)}
                     className={imageError ? 'border-red-300' : ''}
                   />
                   {imageError && (
@@ -390,10 +442,15 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                   <p className="text-sm text-gray-600 mb-2">Current Images:</p>
                   <div className="space-y-2">
                     {images.map((image, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                      >
                         <div className="flex items-center space-x-2">
                           <Image className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-700 truncate max-w-md">{image}</span>
+                          <span className="text-sm text-gray-700 truncate max-w-md">
+                            {image}
+                          </span>
                         </div>
                         <Button
                           type="button"
@@ -417,16 +474,16 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting || updateProductMutation.isPending}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || isLoading}
+                disabled={isSubmitting || updateProductMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {isSubmitting || isLoading ? (
+                {isSubmitting || updateProductMutation.isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     Updating...
@@ -443,7 +500,7 @@ const EditProductModal = ({ isOpen, onClose, onSuccess, product }: EditProductMo
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditProductModal; 
+export default EditProductModal

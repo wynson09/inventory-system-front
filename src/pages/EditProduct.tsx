@@ -6,7 +6,7 @@ const EditProduct = () => {
         <p className="text-gray-600">Edit product form will be here...</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditProduct; 
+export default EditProduct

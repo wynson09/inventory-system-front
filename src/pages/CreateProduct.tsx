@@ -1,19 +1,29 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import { useProductStore } from '../stores/productStore';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Plus, Package, DollarSign, Hash, Tag, Warehouse, AlertCircle, Image, X } from 'lucide-react';
-import type { CreateProductData } from '../types';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { useProductStore } from '../stores/productStore'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import {
+  Plus,
+  Package,
+  DollarSign,
+  Hash,
+  Tag,
+  Warehouse,
+  AlertCircle,
+  Image,
+  X,
+} from 'lucide-react'
+import type { CreateProductData } from '../types'
 
 const CreateProduct = () => {
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageError, setImageError] = useState('');
-  
-  const { createProduct, isLoading } = useProductStore();
-  const navigate = useNavigate();
+  const [imageUrl, setImageUrl] = useState('')
+  const [imageError, setImageError] = useState('')
+
+  const { createProduct, isLoading } = useProductStore()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -21,7 +31,7 @@ const CreateProduct = () => {
     formState: { errors, isSubmitting },
     watch,
     setValue,
-    reset
+    reset,
   } = useForm<CreateProductData>({
     defaultValues: {
       name: '',
@@ -31,12 +41,12 @@ const CreateProduct = () => {
       price: 0,
       quantity: 0,
       minStockLevel: 5,
-      images: []
-    }
-  });
+      images: [],
+    },
+  })
 
   // Watch images array for real-time updates
-  const images = watch('images') || [];
+  const images = watch('images') || []
 
   // Common categories for dropdown
   const categories = [
@@ -50,27 +60,29 @@ const CreateProduct = () => {
     'Health & Beauty',
     'Automotive',
     'Office Supplies',
-    'Other'
-  ];
+    'Other',
+  ]
 
   const addImage = () => {
     if (imageUrl.trim() && !images.includes(imageUrl.trim())) {
       // Basic URL validation
-      const urlPattern = /^https?:\/\/.+/;
+      const urlPattern = /^https?:\/\/.+/
       if (urlPattern.test(imageUrl.trim())) {
-        setValue('images', [...images, imageUrl.trim()]);
-        setImageUrl('');
-        setImageError('');
+        setValue('images', [...images, imageUrl.trim()])
+        setImageUrl('')
+        setImageError('')
       } else {
-        setImageError('Please enter a valid URL (starting with http:// or https://)');
+        setImageError(
+          'Please enter a valid URL (starting with http:// or https://)'
+        )
       }
     }
-  };
+  }
 
   const removeImage = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    setValue('images', updatedImages);
-  };
+    const updatedImages = images.filter((_, i) => i !== index)
+    setValue('images', updatedImages)
+  }
 
   const onSubmit = async (data: CreateProductData) => {
     try {
@@ -78,35 +90,33 @@ const CreateProduct = () => {
       const formData = {
         ...data,
         sku: data.sku.toUpperCase(),
-        images: data.images || []
-      };
-      
-      await createProduct(formData);
-      
+        images: data.images || [],
+      }
+
+      await createProduct(formData)
+
       // Success toast
       toast.success('Product created successfully! 🎉', {
         duration: 3000,
-      });
-      
-      reset();
-      navigate('/products');
+      })
+
+      reset()
+      navigate('/products')
     } catch (error) {
       // Error toast
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create product';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to create product'
       toast.error(errorMessage, {
         duration: 5000,
-      });
+      })
     }
-  };
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Create Product</h1>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/products')}
-        >
+        <Button variant="outline" onClick={() => navigate('/products')}>
           Cancel
         </Button>
       </div>
@@ -116,7 +126,10 @@ const CreateProduct = () => {
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Product Name *
               </label>
               <div className="relative">
@@ -132,19 +145,25 @@ const CreateProduct = () => {
                     required: 'Product name is required',
                     maxLength: {
                       value: 100,
-                      message: 'Product name cannot exceed 100 characters'
+                      message: 'Product name cannot exceed 100 characters',
                     },
-                    validate: value => value.trim().length > 0 || 'Product name cannot be empty'
+                    validate: value =>
+                      value.trim().length > 0 || 'Product name cannot be empty',
                   })}
                 />
               </div>
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="sku"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 SKU *
               </label>
               <div className="relative">
@@ -160,25 +179,31 @@ const CreateProduct = () => {
                     required: 'SKU is required',
                     maxLength: {
                       value: 50,
-                      message: 'SKU cannot exceed 50 characters'
+                      message: 'SKU cannot exceed 50 characters',
                     },
-                    validate: value => value.trim().length > 0 || 'SKU cannot be empty'
+                    validate: value =>
+                      value.trim().length > 0 || 'SKU cannot be empty',
                   })}
-                  onChange={(e) => {
-                    const value = e.target.value.toUpperCase();
-                    setValue('sku', value);
+                  onChange={e => {
+                    const value = e.target.value.toUpperCase()
+                    setValue('sku', value)
                   }}
                 />
               </div>
               {errors.sku && (
-                <p className="mt-1 text-sm text-red-600">{errors.sku.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.sku.message}
+                </p>
               )}
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Description
             </label>
             <textarea
@@ -189,19 +214,24 @@ const CreateProduct = () => {
               {...register('description', {
                 maxLength: {
                   value: 500,
-                  message: 'Description cannot exceed 500 characters'
-                }
+                  message: 'Description cannot exceed 500 characters',
+                },
               })}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.description.message}
+              </p>
             )}
           </div>
 
           {/* Category and Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Category *
               </label>
               <div className="relative">
@@ -212,7 +242,7 @@ const CreateProduct = () => {
                   id="category"
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   {...register('category', {
-                    required: 'Category is required'
+                    required: 'Category is required',
                   })}
                 >
                   <option value="">Select a category</option>
@@ -224,12 +254,17 @@ const CreateProduct = () => {
                 </select>
               </div>
               {errors.category && (
-                <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.category.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Price *
               </label>
               <div className="relative">
@@ -247,14 +282,16 @@ const CreateProduct = () => {
                     required: 'Price is required',
                     min: {
                       value: 0,
-                      message: 'Price cannot be negative'
+                      message: 'Price cannot be negative',
                     },
-                    valueAsNumber: true
+                    valueAsNumber: true,
                   })}
                 />
               </div>
               {errors.price && (
-                <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.price.message}
+                </p>
               )}
             </div>
           </div>
@@ -262,7 +299,10 @@ const CreateProduct = () => {
           {/* Inventory Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Quantity *
               </label>
               <div className="relative">
@@ -279,19 +319,24 @@ const CreateProduct = () => {
                     required: 'Quantity is required',
                     min: {
                       value: 0,
-                      message: 'Quantity cannot be negative'
+                      message: 'Quantity cannot be negative',
                     },
-                    valueAsNumber: true
+                    valueAsNumber: true,
                   })}
                 />
               </div>
               {errors.quantity && (
-                <p className="mt-1 text-sm text-red-600">{errors.quantity.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.quantity.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="minStockLevel" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="minStockLevel"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Minimum Stock Level *
               </label>
               <div className="relative">
@@ -308,14 +353,16 @@ const CreateProduct = () => {
                     required: 'Minimum stock level is required',
                     min: {
                       value: 0,
-                      message: 'Minimum stock level cannot be negative'
+                      message: 'Minimum stock level cannot be negative',
                     },
-                    valueAsNumber: true
+                    valueAsNumber: true,
                   })}
                 />
               </div>
               {errors.minStockLevel && (
-                <p className="mt-1 text-sm text-red-600">{errors.minStockLevel.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.minStockLevel.message}
+                </p>
               )}
             </div>
           </div>
@@ -336,9 +383,9 @@ const CreateProduct = () => {
                     className="pl-10"
                     placeholder="Enter image URL"
                     value={imageUrl}
-                    onChange={(e) => {
-                      setImageUrl(e.target.value);
-                      setImageError('');
+                    onChange={e => {
+                      setImageUrl(e.target.value)
+                      setImageError('')
                     }}
                   />
                 </div>
@@ -354,11 +401,14 @@ const CreateProduct = () => {
               {imageError && (
                 <p className="text-sm text-red-600">{imageError}</p>
               )}
-              
+
               {images.length > 0 && (
                 <div className="space-y-2">
                   {images.map((url, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+                    >
                       <Image className="h-4 w-4 text-gray-400" />
                       <span className="flex-1 text-sm truncate">{url}</span>
                       <Button
@@ -389,7 +439,7 @@ const CreateProduct = () => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateProduct; 
+export default CreateProduct

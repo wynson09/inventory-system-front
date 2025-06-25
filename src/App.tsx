@@ -1,38 +1,45 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Toaster } from 'react-hot-toast';
-import { useAuthStore } from './stores/authStore';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import CreateProduct from './pages/CreateProduct';
-import EditProduct from './pages/EditProduct';
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
+import { useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
+import { useAuthStore } from './stores/authStore'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Products from './pages/Products'
+import ProductDetail from './pages/ProductDetail'
+import CreateProduct from './pages/CreateProduct'
+import EditProduct from './pages/EditProduct'
+import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
-  const { checkAuth, isAuthenticated } = useAuthStore();
+  const { checkAuth, isAuthenticated } = useAuthStore()
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    checkAuth()
+  }, [checkAuth])
 
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Routes>
           {/* Public routes */}
-          <Route 
-            path="/login" 
-            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
           />
-          <Route 
-            path="/register" 
-            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />} 
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Register />
+            }
           />
-          
+
           {/* Protected routes */}
           <Route path="/" element={<ProtectedRoute />}>
             <Route path="/" element={<Layout />}>
@@ -45,9 +52,9 @@ function App() {
             </Route>
           </Route>
         </Routes>
-        
+
         {/* Toast Notifications */}
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
@@ -74,7 +81,7 @@ function App() {
         />
       </div>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App

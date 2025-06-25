@@ -1,16 +1,16 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
-import { Button } from './ui/button';
-import { Package, Home, LogOut } from 'lucide-react';
+import { Outlet, Link, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../stores/authStore'
+import { Button } from './ui/button'
+import { Package, Home, LogOut } from 'lucide-react'
 
 const Layout = () => {
-  const { user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+    logout()
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,7 +24,7 @@ const Layout = () => {
                 Inventory System
               </h1>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
                 Welcome, {user?.firstName} {user?.lastName}
@@ -54,7 +54,7 @@ const Layout = () => {
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
             </Link>
-            
+
             <Link
               to="/products"
               className="flex items-center space-x-2 px-3 py-4 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600"
@@ -71,7 +71,7 @@ const Layout = () => {
         <Outlet />
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Layout; 
+export default Layout
